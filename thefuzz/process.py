@@ -13,7 +13,7 @@ default_scorer = fuzz.WRatio
 default_processor = utils.full_process
 
 
-def extractWithoutOrder(query, choices, processor=default_processor, scorer=default_scorer, score_cutoff=0):
+def extractWithoutOrder(query, choices, processor=default_processor, scorer=default_scorer, score_cutoff=0, matchOnKey=False):
     """Select the best match in a list or dictionary of choices.
 
     Find best matches in a list or dictionary of choices, return a
@@ -106,7 +106,10 @@ def extractWithoutOrder(query, choices, processor=default_processor, scorer=defa
     try:
         # See if choices is a dictionary-like object.
         for key, choice in choices.items():
-            processed = pre_processor(processor(key))
+            if matchOnKey:
+                processed = pre_processor(processor(key))
+            else:
+                processed = pre_processor(processor(choice))
             score = scorer(processed_query, processed)
             if score >= score_cutoff:
                 yield (choice, score, key)
@@ -119,7 +122,7 @@ def extractWithoutOrder(query, choices, processor=default_processor, scorer=defa
                 yield (choice, score)
 
 
-def extract(query, choices, processor=default_processor, scorer=default_scorer, limit=5):
+def extract(query, choices, processor=default_processor, scorer=default_scorer, limit=5, matchOnKey=False):
     """Select the best match in a list or dictionary of choices.
 
     Find best matches in a list or dictionary of choices, return a
@@ -164,7 +167,7 @@ def extract(query, choices, processor=default_processor, scorer=default_scorer, 
 
         [('train', 22, 'bard'), ('man', 0, 'dog')]
     """
-    sl = extractWithoutOrder(query, choices, processor, scorer)
+    sl = extractWithoutOrder(query, choices, processor, scorer, matchOnKey=matchOnKey)
     return heapq.nlargest(limit, sl, key=lambda i: i[1]) if limit is not None else \
         sorted(sl, key=lambda i: i[1], reverse=True)
 
