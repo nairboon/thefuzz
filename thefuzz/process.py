@@ -106,7 +106,7 @@ def extractWithoutOrder(query, choices, processor=default_processor, scorer=defa
     try:
         # See if choices is a dictionary-like object.
         for key, choice in choices.items():
-            processed = pre_processor(processor(choice))
+            processed = pre_processor(processor(key))
             score = scorer(processed_query, processed)
             if score >= score_cutoff:
                 yield (choice, score, key)
